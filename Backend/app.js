@@ -4,7 +4,9 @@ const app = express();
 const mongoose = require('mongoose')
 const cookieParser = require('cookie-parser');
 const router = require('./Routes/router');
-const itemRouter = require('./Routes/itemRoutes'); 
+const Rent = require('./Routes/Rent'); 
+const Exchange = require('./Routes/Exchange'); 
+
 
 const DefaultData = require('./defaultdata');
 const PORT = process.env.PORT || 5000;
@@ -20,8 +22,11 @@ app.use(cors({
 
 app.use(cookieParser());
 app.use(express.json());
+
+
 app.use(router);
-app.use(itemRouter);
+app.use(Rent);
+app.use(Exchange);
 
 
 app.listen(PORT, '0.0.0.0', () => 

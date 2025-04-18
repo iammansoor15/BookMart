@@ -72,6 +72,9 @@ router.post("/rental-request/:requestId/accept", async (req, res) => {
   }
 });
 
+
+
+
 router.post("/rental-request/:requestId/decline", async (req, res) => {
   try {
     const { requestId } = req.params;
@@ -85,7 +88,7 @@ router.post("/rental-request/:requestId/decline", async (req, res) => {
 
     const updatedBook = await bookSchema.findByIdAndUpdate(
       request.bookId,
-      { status: "rented" },
+      { status: "active" },
       { new: true }
     );
     if (!updatedBook) {
@@ -104,6 +107,8 @@ router.post("/rental-request/:requestId/decline", async (req, res) => {
   }
 });
 
+
+
 router.get("/rental-requests/:ownerId", async (req, res) => {
   try {
     const { ownerId } = req.params;
@@ -117,55 +122,7 @@ router.get("/rental-requests/:ownerId", async (req, res) => {
   }
 });
 
-router.get("/notifications/:userId", async (req, res) => {
-  try {
-    const { userId } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      console.error("Invalid userId:", userId);
-      return res.status(400).json({ msg: "Invalid userId" });
-    }
-
-    const userObjectId = new mongoose.Types.ObjectId(userId);
-    console.log("Converted ObjectId:", userObjectId);
-
-    const user = await User.findById(userObjectId);  // Fetch user to get role
-    if (!user) {
-      return res.status(404).json({ msg: "User not found" });
-    }
-
-    const notifications = await Notification.find({
-      userId: userObjectId,
-    }).sort({ createdAt: -1 });
-
-    if (!notifications.length) {
-      console.warn("No notifications found for userId:", userObjectId);
-    } else {
-      console.log("Notifications:", notifications);
-    }
-
-    const rentalRequests = await RentalRequest.find({
-      ownerId: userObjectId,
-      status: "pending",
-    });
-
-    if (!rentalRequests.length) {
-      console.warn("No rental requests found for ownerId:", userObjectId);
-    } else {
-      console.log("Rental Requests:", rentalRequests);
-    }
-
-    // Send role as part of the response
-    res.json({
-      notifications,
-      rentalRequests,
-      role: user.role,  // Include the role in the response
-    });
-  } catch (error) {
-    console.error("Error fetching notifications:", error);
-    res.status(500).json({ msg: "Error fetching notifications" });
-  }
-});
 
 
 module.exports = router;

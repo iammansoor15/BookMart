@@ -51,7 +51,7 @@ const bookSchema = new mongoose.Schema({
   },
   status:{
     type:String,
-    enum:['active','rented','sold'],
+    enum:['active','rented','exchanged'],
     default:'active'
   }
 

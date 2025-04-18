@@ -1,7 +1,11 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const router = express.Router();
 const bookSchema = require("../models/bookSchema");
 const User = require("../models/userSchema");
+const ExchangeRequest = require("../models/exchangeRequestSchema");
+const RentalRequest = require("../models/rentalRequestSchema");
+const Notification = require("../models/norificationSchema");
 
 
 
@@ -194,6 +198,71 @@ router.get("/profile", async (req, res) => {
     }
   });
   
+
+
+
+  router.get("/notifications/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+  
+      if (!mongoose.Types.ObjectId.isValid(userId)) {
+        console.error("Invalid userId:", userId);
+        return res.status(400).json({ msg: "Invalid userId" });
+      }
+  
+      const userObjectId = new mongoose.Types.ObjectId(userId);
+      console.log("Converted ObjectId:", userObjectId);
+  
+      const user = await User.findById(userObjectId);
+      if (!user) {
+        return res.status(404).json({ msg: "User not found" });
+      }
+  
+      const notifications = await Notification.find({
+        userId: userObjectId,
+      }).sort({ createdAt: -1 });
+  
+      if (!notifications.length) {
+        console.warn("No notifications found for userId:", userObjectId);
+      } else {
+        console.log("Notifications:", notifications);
+      }
+  
+      const rentalRequests = await RentalRequest.find({
+        ownerId: userObjectId,
+        status: "pending",
+      });
+  
+      if (!rentalRequests.length) {
+        console.warn("No rental requests found for ownerId:", userObjectId);
+      } else {
+        console.log("Rental Requests:", rentalRequests);
+      }
+  
+      const exchangeRequests = await ExchangeRequest.find({
+        ownerId: userObjectId,
+        status: "pending",
+      });
+  
+      if (!exchangeRequests.length) {
+        console.warn("No exchange requests found for ownerId:", userObjectId);
+      } else {
+        console.log("Exchange Requests:", exchangeRequests);
+      }
+  
+      res.json({
+        notifications,
+        rentalRequests,
+        exchangeRequests,
+        role: user.role,
+      });
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      res.status(500).json({ msg: "Error fetching notifications" });
+    }
+  });
+  
+
   
   
   
